@@ -1,0 +1,9 @@
+<div class="search-block">
+    <button class="search-icon" mat-icon-button color="primary" [disabled]="disabled" (click)="search()">
+        <mat-icon>search</mat-icon>
+    </button>
+    <input class="search-control" type="text" [placeholder]="placeholder" #searchInput>
+    <button mat-button mat-icon-button color="primary" [class.hidden]="disabled" (click)="clear()">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>

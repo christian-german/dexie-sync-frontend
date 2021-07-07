@@ -1,0 +1,43 @@
+@import 'responsive.mixin.scss';
+
+header {
+    position: fixed;
+    top: 0;
+    z-index: 11;
+    transition: all 250ms ease-in-out;
+}
+
+.main-header {
+    @extend header;
+
+    .title-zone {
+        @include screen('phone'){
+            display: none;
+        }
+        padding:8px 10px 0 10px;
+        cursor: pointer;
+
+        .title {
+            margin-bottom:2px;
+        }
+
+        .sub-title {
+            line-height:.6rem;
+            font-style: italic;
+        }
+    }
+
+    .mobile {
+        display: none;
+        @include screen('phone'){
+            display: block;
+        }
+    }
+
+    .nb-results {
+        padding: 0 10px;
+        @include screen('phone'){
+            font-size: 0.75em;
+        }
+    }
+}

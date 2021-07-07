@@ -1,0 +1,9 @@
+<section class="books-list">
+  <ul>
+    <li *ngFor="let book of books$ | async">{{ book.title }}</li>
+  </ul>
+
+  <button mat-button (click)="addBook()">
+    Add book
+  </button>
+</section>

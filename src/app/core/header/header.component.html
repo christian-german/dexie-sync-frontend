@@ -1,0 +1,14 @@
+<mat-toolbar color="primary" class="main-header mat-elevation-z4">
+    <mat-toolbar-row style="padding: 0 5px;">
+        <div class="title-zone" (click)="goHome()">
+            <div class="mat-title title">Mon Portail</div>
+            <div class="mat-subheading-2 sub-title">by Innoval</div>
+        </div>
+        <button class="mobile" mat-icon-button (click)="goHome()"><mat-icon>home</mat-icon></button>
+        <app-search placeholder="Rechercher..." (searchUpdate)="doSearch($event)" min-chars="3" #appSearch></app-search>
+        <div class="nb-results">
+            {{nbResults}} employés
+        </div>
+
+    </mat-toolbar-row>
+</mat-toolbar>
