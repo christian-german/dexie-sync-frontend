@@ -1,7 +1,10 @@
-import {Router} from '@angular/router';
-import {SearchComponent} from '../../shared/search/search.component';
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {DatabaseService} from "../services/database.service";
+import { Router } from '@angular/router';
+import { SearchComponent } from '../../shared/search/search.component';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { AuthorService } from '../../features/book/services/author.service';
+import { map } from 'rxjs/operators';
+import { SearchService } from '../../shared/services/search.service';
+import { BookService } from '../../features/book/services/book.service';
 
 @Component({
   selector: 'app-header',
@@ -13,9 +16,19 @@ export class HeaderComponent implements OnInit {
   @ViewChild(SearchComponent) appSearch!: SearchComponent;
   // disabled = this.datastoreService.isSearching;
 
-  nbResults = 0;
+  nbAuthors$ = this.authorService.getAll().pipe(
+    map(authors => authors.length),
+  );
 
-  constructor(private datastoreService: DatabaseService, private router: Router) {
+  nbBooks$ = this.bookService.getAll().pipe(
+    map(books => books.length),
+  )
+
+  constructor(
+    private readonly authorService: AuthorService,
+    private readonly bookService: BookService,
+    private router: Router,
+    private readonly searchService: SearchService) {
   }
 
   ngOnInit(): void {
@@ -23,7 +36,7 @@ export class HeaderComponent implements OnInit {
   }
 
   doSearch(text: string): void {
-    // this.datastoreService.doSearch.emit(text);
+    this.searchService.query.next(text);
   }
 
   goHome(): void {

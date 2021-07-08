@@ -19,6 +19,7 @@ export class BooksListComponent implements OnInit {
 
   ngOnInit(): void {
     this.books$ = this.getBooks(this.authorId!!);
+    // this.books$.subscribe((data) => console.info('New: ', data));
   }
 
   getBooks(authorId: string): Observable<Book[]> {
@@ -31,6 +32,6 @@ export class BooksListComponent implements OnInit {
         title: "New book",
         authorId: this.authorId!!
       }
-    );
+    ).subscribe();
   }
 }

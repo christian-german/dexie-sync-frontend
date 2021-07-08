@@ -1,11 +1,14 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import Dexie from 'dexie';
-import {DatabaseService} from "../../../core/services/database.service";
-import {from} from "rxjs";
-import {Book} from "./book.service";
+import { DatabaseService } from '../../../core/services/database.service';
+import { from } from 'rxjs';
+import { Book, BookService } from './book.service';
+import { Store } from '../../../core/classes/store';
+import { mergeMap, switchMap, tap } from 'rxjs/operators';
+import { EventBusService } from '../../../core/services/event-bus.service';
 
 export interface Author {
-  id?: string;
+  id: string;
   firstname: string;
   lastname: string;
 }
@@ -13,38 +16,25 @@ export interface Author {
 @Injectable({
   providedIn: 'root',
 })
-export class AuthorService {
-  authorTable: Dexie.Table<Author, string>;
-  bookTable: Dexie.Table<Book, string>;
-
-  constructor(private databaseService: DatabaseService) {
-    this.authorTable = this.databaseService.table('authors');
-    this.bookTable = this.databaseService.table('books');
+export class AuthorService extends Store<Author> {
+  constructor(protected readonly databaseService: DatabaseService,
+              protected readonly eventBusService: EventBusService,
+              protected readonly bookService: BookService) {
+    super(databaseService, eventBusService,'authors');
   }
 
-  get(id: string) {
-    return this.authorTable.get(id);
-  }
-
-  getAll() {
-    return from(this.authorTable.toArray()).pipe();
-  }
-
-  add(data: Author) {
-    return this.authorTable.add(data);
-  }
-
-  update(id: string, data: Author) {
-    return from(this.authorTable.update(id, data)).pipe();
-  }
-
-  remove(id: string) {
+  delete(id: string) {
     // Remove associated books.
-    this.databaseService.transaction('rw', this.bookTable, this.authorTable, () => {
-      this.bookTable.where('authorId').equals(id).each(book => {
-        this.bookTable.delete(book.id!).then();
+    return from(this.databaseService.transaction('rw', this.bookService.getTable(), this.table, () => {
+      this.bookService.getTable().where('authorId').equals(id).each(book => {
+        this.bookService.getTable().delete(book.id!).then();
       });
-      return this.authorTable.delete(id);
-    });
+    })).pipe(
+      switchMap(value => super.delete(id))
+    );
+  }
+
+  getId(item: Author): string {
+    return item.id;
   }
 }

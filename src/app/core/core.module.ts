@@ -1,15 +1,19 @@
-import {RouterModule} from '@angular/router';
-import {SharedModule} from '../shared/shared.module';
-import {NgModule, Optional, SkipSelf} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {HeaderComponent} from './header/header.component';
+import { RouterModule } from '@angular/router';
+import { SharedModule } from '../shared/shared.module';
+import { NgModule, Optional, SkipSelf } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HeaderComponent } from './header/header.component';
+import { EventBusModule } from './modules/event-bus.module';
+import { StoreModule } from './modules/store.module';
 
 @NgModule({
   declarations: [HeaderComponent],
   imports: [
     CommonModule,
     SharedModule,
-    RouterModule
+    RouterModule,
+    StoreModule,
+    EventBusModule
   ],
   exports: [
     HeaderComponent

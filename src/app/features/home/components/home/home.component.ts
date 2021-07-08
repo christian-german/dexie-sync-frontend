@@ -1,15 +1,16 @@
-import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
-import {map} from 'rxjs/operators';
-import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {Observable} from 'rxjs';
-import {Author, AuthorService} from "../../../book/services/author.service";
-import {animate, state, style, transition, trigger} from "@angular/animations";
-import {BookService} from "../../../book/services/book.service";
-import {SelectionModel} from "@angular/cdk/collections";
-import {MatTableDataSource} from "@angular/material/table";
-import {MatDialog} from "@angular/material/dialog";
-import {DialogAddAuthorComponent} from "../dialog-add-author/dialog-add-author.component";
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { map } from 'rxjs/operators';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Author, AuthorService } from '../../../book/services/author.service';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { BookService } from '../../../book/services/book.service';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogAddAuthorComponent } from '../dialog-add-author/dialog-add-author.component';
+import { SearchService } from '../../../../shared/services/search.service';
 
 @Component({
   selector: 'app-home',
@@ -30,15 +31,16 @@ export class HomeComponent implements OnInit {
   expandedAuthor!: Author | null;
   selection = new SelectionModel<Author>(true, []);
   datasource = new MatTableDataSource<any>();
-  addedAuthorFirstname: string = "";
-  addedAuthorLastname: string = "";
+  addedAuthorFirstname: string = '';
+  addedAuthorLastname: string = '';
 
   @ViewChild('viewport') viewport: CdkVirtualScrollViewport | undefined;
 
   constructor(private authorService: AuthorService,
               private bookService: BookService,
               private readonly breakpointObserver: BreakpointObserver,
-              public dialog: MatDialog) {
+              public dialog: MatDialog,
+              public searchService: SearchService) {
     this.cardsCols$ = this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.Tablet]).pipe(
       map(({matches}) => {
         if (matches && this.breakpointObserver.isMatched(Breakpoints.Handset)) {
@@ -66,6 +68,11 @@ export class HomeComponent implements OnInit {
     this.authorService.getAll().subscribe(value => {
       this.datasource = new MatTableDataSource<any>(value);
     })
+    this.searchService.query.subscribe(searchTerm => {
+      const filterValue = searchTerm;
+      console.info(searchTerm)
+      this.datasource.filter = filterValue.trim().toLowerCase();
+    })
   }
 
   isAllSelected() {
@@ -92,8 +99,8 @@ export class HomeComponent implements OnInit {
   addAuthor() {
     this.authorService.add(
       {
-        firstname: "Author1-firstname",
-        lastname: "Author1-lastname"
+        firstname: 'Author1-firstname',
+        lastname: 'Author1-lastname'
       }
     );
   }
@@ -102,7 +109,7 @@ export class HomeComponent implements OnInit {
     this.selection.selected.forEach(
       author => {
         console.log(`Deleting author: ${JSON.stringify(author)}`);
-        this.authorService.remove(author.id!);
+        this.authorService.delete(author.id!).subscribe();
       }
     );
   }
@@ -121,7 +128,7 @@ export class HomeComponent implements OnInit {
             firstname: result.firstname,
             lastname: result.lastname
           }
-        );
+        ).subscribe();
       }
     });
   }
