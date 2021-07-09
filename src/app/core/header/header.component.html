@@ -9,8 +9,14 @@
     </button>
     <app-search placeholder="Rechercher..." (searchUpdate)="doSearch($event)" min-chars="3" #appSearch></app-search>
     <div class="nb-results">
-      {{nbAuthors$ | async}} auteurs
-      {{nbBooks$ | async}} livres
+      {{nbAuthors$ | async}} auteurs |
+      {{nbBooks$ | async}} livres |
+      <ng-container *ngIf="currentRevision$ | async as currentRevision; else syncroDisconnected">
+        🟢 {{currentRevision}} currentRevision
+      </ng-container>
+      <ng-template #syncroDisconnected>
+        🔴 Syncro not connected (refresh until it goes green to fix it)
+      </ng-template>
     </div>
 
   </mat-toolbar-row>
