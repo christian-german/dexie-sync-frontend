@@ -5,6 +5,8 @@ import { map } from 'rxjs/operators';
 import { SearchService } from '../../shared/services/search.service';
 import { AuthorService } from '../services/author.service';
 import { BookService } from '../services/book.service';
+import { EventBusService } from '../services/event-bus.service';
+import { CurrentRevisionChangeEvent, DexieEvents } from '../classes/bus-events';
 
 @Component({
   selector: 'app-header',
@@ -24,11 +26,17 @@ export class HeaderComponent implements OnInit {
     map(books => books.length),
   )
 
+  currentRevision$ = this.eventBusService.on<CurrentRevisionChangeEvent>(DexieEvents.DEXIE_CURRENT_REVISION_CHANGE).pipe(
+    map(event => event.payload.currentRevision),
+  )
+
   constructor(
     private readonly authorService: AuthorService,
     private readonly bookService: BookService,
     private router: Router,
-    private readonly searchService: SearchService) {
+    private readonly searchService: SearchService,
+    // TODO REMOVE
+    private readonly eventBusService: EventBusService) {
   }
 
   ngOnInit(): void {
