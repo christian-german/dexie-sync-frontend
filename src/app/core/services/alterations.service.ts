@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EventBusService } from './event-bus.service';
-import { StoreCacheAddEvent, StoreEvents } from '../classes/bus-events';
+import { StoreCacheAddedEvent, StoreEvents } from '../classes/bus-events';
 import { StoreCollectionService } from './store-collection.service';
 
 @Injectable({
@@ -17,7 +17,7 @@ export class AlterationsService {
   }
 
   private notifyAnyCacheChange() {
-    this.eventBusService.on<StoreCacheAddEvent>(StoreEvents.STORE_CACHE_ADD).subscribe(store => {
+    this.eventBusService.on<StoreCacheAddedEvent<any>>(StoreEvents.STORE_CACHE_ADDED).subscribe(store => {
       console.info(store);
       this.snackBar.open(`Cache altered for: ${store.tableName}`, '', {duration: 1500})
     })
