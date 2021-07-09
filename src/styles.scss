@@ -12,4 +12,13 @@ body {
 table {
   width: 100%;
 }
-
+@media only screen and (max-width: 600px) {
+  app-root {
+    mat-toolbar-row {
+      flex-direction: column !important;
+      height: 100% !important;
+    }
+    app-home {
+    }
+  }
+}
