@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  DEBOUNCE_TIME: 500
+  DEBOUNCE_TIME: 500,
+  serverUrl: 'http://localhost:8080/sync'
 };
 
 /*

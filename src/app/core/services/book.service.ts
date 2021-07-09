@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
 import Dexie from 'dexie';
-import {DatabaseService} from "../../../core/services/database.service";
 import {from, Observable} from "rxjs";
-import { Store } from '../../../core/classes/store';
 import { pluck, tap } from 'rxjs/operators';
-import { EventBusService } from '../../../core/services/event-bus.service';
+import { Store } from '../classes/store';
+import { DatabaseService } from './database.service';
+import { EventBusService } from './event-bus.service';
 
 export interface Book {
   id: string;

@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import Dexie from 'dexie';
-import { DatabaseService } from '../../../core/services/database.service';
 import { from } from 'rxjs';
 import { Book, BookService } from './book.service';
-import { Store } from '../../../core/classes/store';
 import { mergeMap, switchMap, tap } from 'rxjs/operators';
-import { EventBusService } from '../../../core/services/event-bus.service';
+import { EventBusService } from './event-bus.service';
+import { Store } from '../classes/store';
+import { DatabaseService } from './database.service';
 
 export interface Author {
   id: string;

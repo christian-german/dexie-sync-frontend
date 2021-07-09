@@ -3,14 +3,15 @@ import { map } from 'rxjs/operators';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Author, AuthorService } from '../../../book/services/author.service';
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { BookService } from '../../../book/services/book.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddAuthorComponent } from '../dialog-add-author/dialog-add-author.component';
 import { SearchService } from '../../../../shared/services/search.service';
+import { Author, AuthorService } from '../../../../core/services/author.service';
+import { BookService } from '../../../../core/services/book.service';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-home',
@@ -33,6 +34,8 @@ export class HomeComponent implements OnInit {
   datasource = new MatTableDataSource<any>();
   addedAuthorFirstname: string = '';
   addedAuthorLastname: string = '';
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   @ViewChild('viewport') viewport: CdkVirtualScrollViewport | undefined;
 
@@ -67,6 +70,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.authorService.getAll().subscribe(value => {
       this.datasource = new MatTableDataSource<any>(value);
+      this.datasource.paginator = this.paginator;
     })
     this.searchService.query.subscribe(searchTerm => {
       const filterValue = searchTerm;

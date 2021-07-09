@@ -1,10 +1,10 @@
 import { Router } from '@angular/router';
 import { SearchComponent } from '../../shared/search/search.component';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { AuthorService } from '../../features/book/services/author.service';
 import { map } from 'rxjs/operators';
 import { SearchService } from '../../shared/services/search.service';
-import { BookService } from '../../features/book/services/book.service';
+import { AuthorService } from '../services/author.service';
+import { BookService } from '../services/book.service';
 
 @Component({
   selector: 'app-header',
