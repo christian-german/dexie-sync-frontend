@@ -22,6 +22,10 @@ export class BookService extends Store<Book> {
     super(databaseService, eventBusService,'books');
   }
 
+  getCache() {
+    return this.cache$;
+  }
+
   getBooksByAuthorId(authorId: string): Observable<Book[]> {
     return this.getByKey('authorId', authorId);
   }
