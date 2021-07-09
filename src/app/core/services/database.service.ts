@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import Dexie from 'dexie';
 import syncable from 'dexie-syncable';
 import { HttpClient } from '@angular/common/http';
-import { IDatabaseChange } from 'dexie-observable/api';
+import { DatabaseChangeType, ICreateChange, IDatabaseChange, IDeleteChange } from 'dexie-observable/api';
 import { EventBusService } from './event-bus.service';
 import { EmitEvent } from '../interfaces/Event';
 import observable from 'dexie-observable';
-import { DexieEvents } from '../classes/bus-events';
+import { CurrentRevisionChangeEvent, DexieEvents } from '../classes/bus-events';
+import { environment } from '../../../environments/environment';
 
 export interface ServerResponse {
   success: boolean;
@@ -52,10 +53,36 @@ export class DatabaseService extends Dexie {
    * @private
    */
   private listenToSyncChanges() {
-    this.eventBusService.on<IDatabaseChange[]>(DexieEvents.DEXIE_END_SYNC).subscribe((changes: IDatabaseChange[]) => {
-      changes.forEach(change => {
-        this.eventBusService.emit(new EmitEvent(DexieEvents.DEXIE_TABLE_CHANGE, change));
-      })
+    this.eventBusService.on<ServerResponse>(DexieEvents.DEXIE_END_SYNC).subscribe((serverResponse: ServerResponse) => {
+      // Propage la nouvelle version de currentRevision
+      this.eventBusService.emit(new EmitEvent<CurrentRevisionChangeEvent>(DexieEvents.DEXIE_CURRENT_REVISION_CHANGE,
+        {payload: {currentRevision: serverResponse.currentRevision}}))
+      // Propage aux stores associés les changements à appliquer
+      const mappedArray = serverResponse.changes.reduce((accumulator: Record<string, Record<DatabaseChangeType, IDatabaseChange[]>>, item) => {
+        if (!accumulator[item.table]) {
+          accumulator[item.table] = {
+            [DatabaseChangeType.Create]: [],
+            [DatabaseChangeType.Delete]: [],
+            [DatabaseChangeType.Update]: [],
+          };
+        }
+        switch (item.type) {
+          case DatabaseChangeType.Update:
+          case DatabaseChangeType.Delete:
+            accumulator[item.table][item.type].push((item as IDeleteChange).key);
+            break;
+          case DatabaseChangeType.Create:
+            accumulator[item.table][item.type].push((item as ICreateChange).obj);
+            break;
+        }
+        return accumulator;
+      }, {})
+      for (let mappedArrayKey in mappedArray) {
+        this.eventBusService.emit(new EmitEvent(DexieEvents.DEXIE_TABLE_CHANGE, {
+          tableName: mappedArrayKey,
+          payload: mappedArray[mappedArrayKey]
+        }));
+      }
     })
   }
 
@@ -107,7 +134,7 @@ export class DatabaseService extends Dexie {
                     // Convert the response format to the Dexie.Syncable.Remote.SyncProtocolAPI specification:
                     applyRemoteChanges(res.changes, res.currentRevision, res.partial, res.needsResync);
                     onSuccess({again: POLL_INTERVAL});
-                    eventBusService.emit(new EmitEvent(DexieEvents.DEXIE_END_SYNC, res.changes));
+                    eventBusService.emit(new EmitEvent(DexieEvents.DEXIE_END_SYNC, res));
                   })
                   .catch((e) => {
                     // We didn't manage to save the clientIdentity stop synchronization
@@ -119,7 +146,7 @@ export class DatabaseService extends Dexie {
                 // Convert the response format to the Dexie.Syncable.Remote.SyncProtocolAPI specification:
                 applyRemoteChanges(res.changes, res.currentRevision, res.partial, res.needsResync);
                 onSuccess({again: POLL_INTERVAL});
-                eventBusService.emit(new EmitEvent(DexieEvents.DEXIE_END_SYNC, res.changes));
+                eventBusService.emit(new EmitEvent(DexieEvents.DEXIE_END_SYNC, res));
               }
             }
           },
@@ -148,7 +175,7 @@ export class DatabaseService extends Dexie {
    * @private
    */
   private connectDexieSyncro() {
-    this.syncable.connect('ajax_protocol', 'http://localhost:8080/sync')
+    this.syncable.connect('ajax_protocol', environment.serverUrl)
       .catch(err => {
         console.error(`Failed to connect: ${err.stack || err}`);
       });
