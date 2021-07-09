@@ -101,10 +101,10 @@ export class DatabaseService extends Dexie {
       sync: function (context, url, options, baseRevision, syncedRevision, changes, partial, applyRemoteChanges, onChangesAccepted, onSuccess, onError) {
 
         // `Hello, my name is ${fullName}.
-        console.log(`send resquest on: ${url}`);
-        console.log(`data sent: ${JSON.stringify(changes)}`);
+        console.log(`send resquest on: ${url} with base revision: ${baseRevision}, syncedRevision: ${syncedRevision}, partial: ${partial}`);
+        console.log(`changes sent: ${JSON.stringify(changes)}`);
 
-        const POLL_INTERVAL = 10000;
+        const POLL_INTERVAL = 25000;
 
         const request = {
           clientIdentity: context.clientIdentity || null,
@@ -113,11 +113,12 @@ export class DatabaseService extends Dexie {
           changes: changes,
           syncedRevision: syncedRevision
         };
-        console.info(changes);
+
         // TODO Propagate the changes to all corresponding angular's store
         http.post<any>(url, request).subscribe(
           res => {
-            console.log(`received data: ${JSON.stringify(res)}`);
+            console.log(`received request with currentRevision: ${res.currentRevision}, clientIdentity: ${res.clientIdentity}, partial: ${res.partial}, success: ${res.success}`);
+            console.log(`received changes: ${JSON.stringify(res.changes)}`);
 
             if (!res.success) {
               // Infinity: Stop la synchro.
