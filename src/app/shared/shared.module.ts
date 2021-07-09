@@ -10,12 +10,15 @@ import {CommonModule} from '@angular/common';
 import {SearchComponent} from './search/search.component';
 import {FormsModule} from '@angular/forms';
 import {MatCardPrimaryComponent} from './mat-card-primary/mat-card-primary.component';
+import {PromptComponent} from "./prompt-component/prompt-component";
+import {MatBottomSheetModule} from "@angular/material/bottom-sheet";
 
 @NgModule({
-  declarations: [SearchComponent, MatCardPrimaryComponent],
+  declarations: [SearchComponent, MatCardPrimaryComponent, PromptComponent],
   imports: [
     CommonModule,
     MatGridListModule,
+    MatBottomSheetModule,
     MatCardModule,
     MatMenuModule,
     MatIconModule,

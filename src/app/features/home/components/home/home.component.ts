@@ -3,13 +3,14 @@ import {map} from 'rxjs/operators';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Observable} from 'rxjs';
-import {Author, AuthorService} from "../../../book/services/author.service";
 import {animate, state, style, transition, trigger} from "@angular/animations";
-import {BookService} from "../../../book/services/book.service";
 import {SelectionModel} from "@angular/cdk/collections";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatDialog} from "@angular/material/dialog";
 import {DialogAddAuthorComponent} from "../dialog-add-author/dialog-add-author.component";
+import {Author, AuthorService} from "../../../../core/services/author.service";
+import {BookService} from "../../../../core/services/book.service";
+import {MatPaginator} from "@angular/material/paginator";
 
 @Component({
   selector: 'app-home',
@@ -25,13 +26,15 @@ import {DialogAddAuthorComponent} from "../dialog-add-author/dialog-add-author.c
 })
 export class HomeComponent implements OnInit {
 
-  authors$!: Observable<Author[]>;
   cardsCols$: Observable<number>;
   expandedAuthor!: Author | null;
   selection = new SelectionModel<Author>(true, []);
   datasource = new MatTableDataSource<any>();
   addedAuthorFirstname: string = "";
   addedAuthorLastname: string = "";
+
+  // @ts-ignore
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   @ViewChild('viewport') viewport: CdkVirtualScrollViewport | undefined;
 
@@ -65,6 +68,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.authorService.getAll().subscribe(value => {
       this.datasource = new MatTableDataSource<any>(value);
+      this.datasource.paginator = this.paginator;
     })
   }
 
@@ -89,20 +93,11 @@ export class HomeComponent implements OnInit {
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
   }
 
-  addAuthor() {
-    this.authorService.add(
-      {
-        firstname: "Author1-firstname",
-        lastname: "Author1-lastname"
-      }
-    );
-  }
-
   deleteSelected() {
     this.selection.selected.forEach(
       author => {
         console.log(`Deleting author: ${JSON.stringify(author)}`);
-        this.authorService.remove(author.id!);
+        this.authorService.delete(author.id!);
       }
     );
   }
@@ -115,7 +110,6 @@ export class HomeComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log(result);
         this.authorService.add(
           {
             firstname: result.firstname,

@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import Dexie from 'dexie';
-import {DatabaseService} from "../../../core/services/database.service";
 import {from} from "rxjs";
 import {Book} from "./book.service";
+import {DatabaseService} from "./database.service";
 
 export interface Author {
   id?: string;
@@ -38,13 +38,14 @@ export class AuthorService {
     return from(this.authorTable.update(id, data)).pipe();
   }
 
-  remove(id: string) {
-    // Remove associated books.
+  delete(id: string) {
     this.databaseService.transaction('rw', this.bookTable, this.authorTable, () => {
+      // Remove associated books.
       this.bookTable.where('authorId').equals(id).each(book => {
         this.bookTable.delete(book.id!).then();
+      }).then(() => {
+        this.authorTable.delete(id).then();
       });
-      return this.authorTable.delete(id);
     });
   }
 }

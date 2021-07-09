@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import Dexie from 'dexie';
-import {DatabaseService} from "../../../core/services/database.service";
 import {from, Observable} from "rxjs";
+import {DatabaseService} from "./database.service";
 
 export interface Book {
   id?: string;

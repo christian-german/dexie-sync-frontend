@@ -4,6 +4,7 @@ import observable from 'dexie-observable';
 import syncable from 'dexie-syncable';
 import {HttpClient} from "@angular/common/http";
 import {IDatabaseChange} from "dexie-observable/api";
+import {environment} from "../../../environments/environment";
 
 @Injectable({
   providedIn: 'root',
@@ -76,7 +77,7 @@ export class DatabaseService extends Dexie {
       }
     });
 
-    this.syncable.connect("ajax_protocol", "http://localhost:8080/sync")
+    this.syncable.connect("ajax_protocol", environment.serverUrl)
       .catch(err => {
         console.error(`Failed to connect: ${err.stack || err}`);
       });
