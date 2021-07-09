@@ -40,7 +40,7 @@ export class BooksListComponent implements OnInit {
             title: result.title,
             authorId: this.authorId!!
           }
-        );
+        ).subscribe();
       }
     });
   }
