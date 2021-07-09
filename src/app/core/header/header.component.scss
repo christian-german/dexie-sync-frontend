@@ -1,8 +1,6 @@
 @import 'responsive.mixin.scss';
 
 header {
-    position: fixed;
-    top: 0;
     z-index: 11;
     transition: all 250ms ease-in-out;
 }
@@ -36,6 +34,8 @@ header {
 
     .nb-results {
         padding: 0 10px;
+        overflow: auto;
+        width: 100%;
         @include screen('phone'){
             font-size: 0.75em;
         }
