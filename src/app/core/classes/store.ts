@@ -1,9 +1,9 @@
 import { DatabaseService } from '../services/database.service';
 import { Table } from 'dexie';
 import { BehaviorSubject, from, merge } from 'rxjs';
-import { map, pluck, tap } from 'rxjs/operators';
+import { filter, map, pluck, tap } from 'rxjs/operators';
 import { EventBusService } from '../services/event-bus.service';
-import { DexieEvents, StoreCacheAddEvent, StoreEvents } from './bus-events';
+import { DexieEvents, StoreCacheAddedEvent, StoreEvents, StoreRegisterEvent } from './bus-events';
 import { DatabaseChangeType, IDatabaseChange } from 'dexie-observable/api';
 import { EmitEvent } from '../interfaces/Event';
 import { StoreIdentity } from '../interfaces/store-identity';
@@ -45,7 +45,7 @@ export abstract class Store<T> {
     const currentCache = this.cache$.getValue();
     items.forEach((item) => currentCache.set(item.id, item));
     this.cache$.next(currentCache);
-    this.eventBusService.emit<StoreCacheAddEvent>(new EmitEvent(StoreEvents.STORE_CACHE_ADD, {tableName: this.tableName, payload: items}));
+    this.eventBusService.emit<StoreCacheAddedEvent<T>>(new EmitEvent(StoreEvents.STORE_CACHE_ADDED, {tableName: this.tableName, payload: {addedItems: items}}));
   }
 
   get(id: string, refresh = false) {
@@ -90,24 +90,27 @@ export abstract class Store<T> {
     this.cache$.next(currentCache);
   }
 
-  applyTableChange(change: IDatabaseChange) {
-    switch (change.type) {
-      case DatabaseChangeType.Create:
-        this.addToCache([change.obj]);
-        break;
-      case DatabaseChangeType.Delete:
-        this.removeFromCache([change.key])
-        break;
-      case DatabaseChangeType.Update:
+  applyTableChange(changes: Record<DatabaseChangeType, IDatabaseChange[]>) {
+    if (changes[DatabaseChangeType.Create].length > 0) {
+      this.addToCache(changes[DatabaseChangeType.Create]);
+    }
+    if (changes[DatabaseChangeType.Delete].length > 0) {
+      this.removeFromCache(changes[DatabaseChangeType.Delete])
+    }
+    if (changes[DatabaseChangeType.Update].length > 0) {
+
     }
   }
 
   private listenToTableChange() {
-    this.eventBusService.on<IDatabaseChange>(DexieEvents.DEXIE_TABLE_CHANGE).subscribe((change: IDatabaseChange) => this.applyTableChange(change))
+    this.eventBusService.on<any>(DexieEvents.DEXIE_TABLE_CHANGE).pipe(
+      tap(event => console.info(`From: ${this.tableName}Service Received: ${event.tableName}`)),
+      filter(event => event.tableName === this.tableName),
+    ).subscribe((event) => this.applyTableChange(event.payload))
   }
 
   private registerStore() {
-    this.eventBusService.emit(new EmitEvent(StoreEvents.STORE_REGISTER, {
+    this.eventBusService.emit(new EmitEvent<StoreRegisterEvent>(StoreEvents.STORE_REGISTER, {
       tableName: this.tableName,
     }))
   }
