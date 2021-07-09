@@ -71,6 +71,7 @@ export class HomeComponent implements OnInit {
     this.authorService.getAll().subscribe(value => {
       this.datasource = new MatTableDataSource<any>(value);
       this.datasource.paginator = this.paginator;
+      this.datasource.filterPredicate = this.createFilterPredicate();
     })
     this.searchService.query.subscribe(searchTerm => {
       const filterValue = searchTerm;
@@ -135,5 +136,26 @@ export class HomeComponent implements OnInit {
         ).subscribe();
       }
     });
+  }
+
+  private createFilterPredicate() {
+    return (author: Author, search: string) => {
+      search = search.toLowerCase();
+      let returning = false;
+      if (author.lastname.includes(search)) {
+        return true;
+      }
+      if (author.firstname.includes(search)) {
+        return true;
+      }
+      const booksCache = this.bookService.getCache().getValue();
+      for (let [id, book] of booksCache.entries()) {
+        if (book.title.toLowerCase().includes(search) && book.authorId === author.id) {
+          returning = true;
+          break;
+        }
+      }
+      return returning;
+    };
   }
 }
