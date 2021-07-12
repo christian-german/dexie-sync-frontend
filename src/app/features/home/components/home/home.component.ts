@@ -142,10 +142,10 @@ export class HomeComponent implements OnInit {
     return (author: Author, search: string) => {
       search = search.toLowerCase();
       let returning = false;
-      if (author.lastname.includes(search)) {
+      if (author.lastname.toLowerCase().includes(search)) {
         return true;
       }
-      if (author.firstname.includes(search)) {
+      if (author.firstname.toLowerCase().includes(search)) {
         return true;
       }
       const booksCache = this.bookService.getCache().getValue();
