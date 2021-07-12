@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Observable} from "rxjs";
-import { Book, BookService } from '../../../../core/services/book.service';
+import { Book, BookStore } from '../../../../core/stores/book.store';
+import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-list-books',
@@ -14,16 +15,20 @@ export class BooksListComponent implements OnInit {
 
   books$: Observable<Book[]> | undefined;
 
-  constructor(private readonly bookService: BookService) {
+  constructor(private readonly bookService: BookStore) {
   }
 
   ngOnInit(): void {
-    this.books$ = this.getBooks(this.authorId!!);
+    this.books$ = this.getBooks(this.authorId!!).pipe(
+    );
     // this.books$.subscribe((data) => console.info('New: ', data));
   }
 
   getBooks(authorId: string): Observable<Book[]> {
-    return this.bookService.getBooksByAuthorId(authorId);
+    console.info('GetBooks');
+    return this.bookService.getBooksByAuthorId(authorId).pipe(
+      tap(value => console.info(value)),
+    );
   }
 
   addBook() {

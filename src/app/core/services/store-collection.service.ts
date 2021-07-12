@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { EventBusService } from './event-bus.service';
 import { BehaviorSubject } from 'rxjs';
 import { StoreIdentity } from '../interfaces/store-identity';
-import { StoreCacheAddedEvent, StoreEvents } from '../classes/bus-events';
+import { StoreCacheDataAddedEvent, StoreEvents } from '../classes/bus-events';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +18,7 @@ export class StoreCollectionService {
   }
 
   private listenToRegisterStore() {
-    this.eventBusService.on<StoreCacheAddedEvent<any>>(StoreEvents.STORE_REGISTER).subscribe((store: StoreIdentity) => {
+    this.eventBusService.on<StoreCacheDataAddedEvent<any>>(StoreEvents.STORE_REGISTER).subscribe((store: StoreIdentity) => {
       this.stores.next([...this.stores.getValue(), store])
     })
   }

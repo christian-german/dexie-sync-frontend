@@ -3,8 +3,8 @@ import { SearchComponent } from '../../shared/search/search.component';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { SearchService } from '../../shared/services/search.service';
-import { AuthorService } from '../services/author.service';
-import { BookService } from '../services/book.service';
+import { AuthorStore } from '../stores/author.store';
+import { BookStore } from '../stores/book.store';
 import { EventBusService } from '../services/event-bus.service';
 import { CurrentRevisionChangeEvent, DexieEvents } from '../classes/bus-events';
 
@@ -31,8 +31,8 @@ export class HeaderComponent implements OnInit {
   )
 
   constructor(
-    private readonly authorService: AuthorService,
-    private readonly bookService: BookService,
+    private readonly authorService: AuthorStore,
+    private readonly bookService: BookStore,
     private router: Router,
     private readonly searchService: SearchService,
     // TODO REMOVE

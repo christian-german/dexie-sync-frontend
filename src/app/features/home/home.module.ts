@@ -13,6 +13,7 @@ import {MatDialogModule} from "@angular/material/dialog";
 import {BooksListComponent} from "./components/book-list/books-list.component";
 import {DialogAddBookComponent} from "./components/dialog-add-book/dialog-add-book.component";
 import {MatPaginatorModule} from "@angular/material/paginator";
+import { HomeService } from './services/home.service';
 
 @NgModule({
   declarations: [HomeComponent, BooksListComponent, DialogAddAuthorComponent, DialogAddBookComponent],
@@ -26,6 +27,9 @@ import {MatPaginatorModule} from "@angular/material/paginator";
     MatCheckboxModule,
     MatDialogModule,
     MatPaginatorModule
+  ],
+  providers: [
+    HomeService,
   ]
 })
 export class HomeModule {

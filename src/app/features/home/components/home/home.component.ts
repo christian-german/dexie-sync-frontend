@@ -1,17 +1,13 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { map } from 'rxjs/operators';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogAddAuthorComponent } from '../dialog-add-author/dialog-add-author.component';
-import { SearchService } from '../../../../shared/services/search.service';
-import { Author, AuthorService } from '../../../../core/services/author.service';
-import { BookService } from '../../../../core/services/book.service';
+import { Author } from '../../../../core/stores/author.store';
 import { MatPaginator } from '@angular/material/paginator';
+import { HomeService } from '../../services/home.service';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -28,55 +24,28 @@ import { MatPaginator } from '@angular/material/paginator';
 export class HomeComponent implements OnInit {
 
   authors$!: Observable<Author[]>;
-  cardsCols$: Observable<number>;
+  cardsCols$: Observable<number> = this.homeService.getCardsCols$();
   expandedAuthor!: Author | null;
   selection = new SelectionModel<Author>(true, []);
   datasource = new MatTableDataSource<any>();
-  addedAuthorFirstname: string = '';
-  addedAuthorLastname: string = '';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   @ViewChild('viewport') viewport: CdkVirtualScrollViewport | undefined;
 
-  constructor(private authorService: AuthorService,
-              private bookService: BookService,
-              private readonly breakpointObserver: BreakpointObserver,
-              public dialog: MatDialog,
-              public searchService: SearchService) {
-    this.cardsCols$ = this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.Tablet]).pipe(
-      map(({matches}) => {
-        if (matches && this.breakpointObserver.isMatched(Breakpoints.Handset)) {
-          return 1;
-        }
-
-        if (matches && this.breakpointObserver.isMatched(Breakpoints.Tablet)) {
-          return 2;
-        }
-        return 4;
-      })
-    );
-
-    const connection = (navigator as any).connection;
-    let type = connection.effectiveType;
-    const updateConnectionStatus = () => {
-      console.log(`Connection type changed from ${type} to ${connection.effectiveType}`);
-      console.log(`Effective bandwidth estimate ${connection.downlink}Mb/s`);
-      type = connection.effectiveType;
-    }
-    connection.addEventListener('change', updateConnectionStatus);
+  constructor(
+    private readonly homeService: HomeService,
+  ) {
   }
 
   ngOnInit(): void {
-    this.authorService.getAll().subscribe(value => {
-      this.datasource = new MatTableDataSource<any>(value);
+    this.homeService.authors.subscribe((authors) => {
+      this.datasource = new MatTableDataSource<any>(authors);
       this.datasource.paginator = this.paginator;
-      this.datasource.filterPredicate = this.createFilterPredicate();
+      this.datasource.filterPredicate = this.homeService.createFilterPredicate();
     })
-    this.searchService.query.subscribe(searchTerm => {
-      const filterValue = searchTerm;
-      console.info(searchTerm)
-      this.datasource.filter = filterValue.trim().toLowerCase();
+    this.homeService.getQuery$().subscribe(searchTerm => {
+      this.datasource.filter = searchTerm.trim().toLowerCase();
     })
   }
 
@@ -101,61 +70,16 @@ export class HomeComponent implements OnInit {
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
   }
 
-  addAuthor() {
-    this.authorService.add(
-      {
-        firstname: 'Author1-firstname',
-        lastname: 'Author1-lastname'
-      }
-    );
-  }
-
   deleteSelected() {
     this.selection.selected.forEach(
       author => {
         console.log(`Deleting author: ${JSON.stringify(author)}`);
-        this.authorService.delete(author.id!).subscribe();
+        this.homeService.deleteAuthor(author.id!).subscribe();
       }
     );
   }
 
   openAddAuthorDialog() {
-    const dialogRef = this.dialog.open(DialogAddAuthorComponent, {
-      width: '350px',
-      data: {firstname: this.addedAuthorFirstname, lastname: this.addedAuthorLastname}
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log(result);
-        this.authorService.add(
-          {
-            firstname: result.firstname,
-            lastname: result.lastname
-          }
-        ).subscribe();
-      }
-    });
-  }
-
-  private createFilterPredicate() {
-    return (author: Author, search: string) => {
-      search = search.toLowerCase();
-      let returning = false;
-      if (author.lastname.toLowerCase().includes(search)) {
-        return true;
-      }
-      if (author.firstname.toLowerCase().includes(search)) {
-        return true;
-      }
-      const booksCache = this.bookService.getCache().getValue();
-      for (let [id, book] of booksCache.entries()) {
-        if (book.title.toLowerCase().includes(search) && book.authorId === author.id) {
-          returning = true;
-          break;
-        }
-      }
-      return returning;
-    };
+    this.homeService.openAddAuthorDialog().pipe(first()).subscribe()
   }
 }

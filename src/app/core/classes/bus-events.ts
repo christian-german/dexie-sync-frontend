@@ -1,8 +1,11 @@
 import { IEvent } from '../interfaces/IEvent';
 
 export class StoreEvents implements IEvent {
-  public static STORE_CACHE_ADDED = 'STORE_CACHE_ADD';
-  public static STORE_CACHE_REMOVE = 'STORE_CACHE_REMOVE';
+  public static STORE_CACHE_DATA_ADDED = 'STORE_CACHE_DATA_ADDED';
+  public static STORE_CACHE_DATA_REMOVE = 'STORE_CACHE_DATA_REMOVE';
+
+  public static STORE_CACHE_OPERATION_ADDED = 'STORE_CACHE_OPERATION_ADDED';
+  public static STORE_CACHE_OPERATION_REMOVE = 'STORE_CACHE_OPERATION_REMOVE';
   public static STORE_REGISTER = 'STORE_REGISTER';
 }
 
@@ -10,9 +13,17 @@ export interface Event {
   payload?: any;
 }
 
-export interface StoreCacheAddedEvent<T> extends Event {
+export interface StoreCacheDataAddedEvent<T> extends Event {
   tableName: string;
   payload: {
+    addedItems: T[]
+  }
+}
+
+export interface StoreCacheOperationAddedEvent<T> extends Event {
+  tableName: string;
+  payload: {
+    operationKey: string;
     addedItems: T[]
   }
 }

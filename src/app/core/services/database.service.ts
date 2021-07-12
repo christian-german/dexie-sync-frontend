@@ -1,13 +1,14 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import Dexie from 'dexie';
 import syncable from 'dexie-syncable';
-import {HttpClient} from '@angular/common/http';
-import {DatabaseChangeType, ICreateChange, IDatabaseChange, IDeleteChange} from 'dexie-observable/api';
-import {EventBusService} from './event-bus.service';
-import {EmitEvent} from '../interfaces/Event';
+import { HttpClient } from '@angular/common/http';
+import { DatabaseChangeType, ICreateChange, IDatabaseChange, IDeleteChange } from 'dexie-observable/api';
+import { EventBusService } from './event-bus.service';
+import { EmitEvent } from '../interfaces/Event';
 import observable from 'dexie-observable';
-import {CurrentRevisionChangeEvent, DexieEvents} from '../classes/bus-events';
-import {environment} from '../../../environments/environment';
+import { CurrentRevisionChangeEvent, DexieEvents } from '../classes/bus-events';
+import { environment } from '../../../environments/environment';
+import { from } from 'rxjs';
 
 export interface ServerResponse {
   success: boolean;
@@ -108,7 +109,7 @@ export class DatabaseService extends Dexie {
 
         const request = {
           clientIdentity: context.clientIdentity || null,
-          baseRevision: baseRevision + 1,
+          baseRevision: baseRevision || 0,
           partial: partial,
           changes: changes,
           syncedRevision: syncedRevision
