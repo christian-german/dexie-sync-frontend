@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import Dexie from 'dexie';
 import syncable from 'dexie-syncable';
-import { HttpClient } from '@angular/common/http';
-import { DatabaseChangeType, ICreateChange, IDatabaseChange, IDeleteChange } from 'dexie-observable/api';
-import { EventBusService } from './event-bus.service';
-import { EmitEvent } from '../interfaces/Event';
+import {HttpClient} from '@angular/common/http';
+import {DatabaseChangeType, ICreateChange, IDatabaseChange, IDeleteChange} from 'dexie-observable/api';
+import {EventBusService} from './event-bus.service';
+import {EmitEvent} from '../interfaces/Event';
 import observable from 'dexie-observable';
-import { CurrentRevisionChangeEvent, DexieEvents } from '../classes/bus-events';
-import { environment } from '../../../environments/environment';
+import {CurrentRevisionChangeEvent, DexieEvents} from '../classes/bus-events';
+import {environment} from '../../../environments/environment';
 
 export interface ServerResponse {
   success: boolean;
@@ -104,7 +104,7 @@ export class DatabaseService extends Dexie {
         console.log(`send resquest on: ${url} with base revision: ${baseRevision}, syncedRevision: ${syncedRevision}, partial: ${partial}`);
         console.log(`changes sent: ${JSON.stringify(changes)}`);
 
-        const POLL_INTERVAL = 25000;
+        const POLL_INTERVAL = 10000;
 
         const request = {
           clientIdentity: context.clientIdentity || null,
@@ -134,7 +134,12 @@ export class DatabaseService extends Dexie {
                     onChangesAccepted();
                     // Convert the response format to the Dexie.Syncable.Remote.SyncProtocolAPI specification:
                     applyRemoteChanges(res.changes, res.currentRevision, res.partial, res.needsResync);
-                    onSuccess({again: POLL_INTERVAL});
+                    // Immediatly send another request if the client received a partial change.
+                    if (res.partial) {
+                      onSuccess({again: 0});
+                    } else {
+                      onSuccess({again: POLL_INTERVAL});
+                    }
                     eventBusService.emit(new EmitEvent(DexieEvents.DEXIE_END_SYNC, res));
                   })
                   .catch((e) => {
