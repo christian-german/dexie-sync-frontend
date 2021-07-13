@@ -1,11 +1,12 @@
 import { Observable, Subject } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { BaseCache } from './base-cache';
 
 export class CacheData<T> extends BaseCache<T> {
 
   refresh$ = new Subject();
   onRefresh$ = this.refresh$.pipe(
+    filter(_ => !this.isLocked$.getValue()),
     tap(_ => this.isSyncronizing$.next(true)),
     switchMap(_ => this.refresher$),
     map(values => this.toMap(values)),
@@ -20,10 +21,11 @@ export class CacheData<T> extends BaseCache<T> {
    * @param initialState
    */
   constructor(
+    protected readonly isLocked = false,
     protected readonly refresher$: Observable<T[]>,
     protected readonly getId: (item: T) => string,
   ) {
-    super(new Map<string, T>());
+    super(isLocked);
     this.onRefresh$.subscribe();
     this.refresh();
   }

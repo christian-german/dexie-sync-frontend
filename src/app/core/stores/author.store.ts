@@ -24,7 +24,7 @@ export class AuthorStore extends BaseStore<Author> {
 
   delete(id: string) {
     // Remove associated books.
-    return from(this.databaseService.transaction('rw', this.bookStore.getTable(), this.table, () => {
+    return from(this.databaseService.createTransaction('rw', [this.bookStore.getTable().name, this.table.name], () => {
       this.bookStore.getTable().where('authorId').equals(id).each(book => {
         this.bookStore.getTable().delete(book.id!).then();
       });
@@ -33,7 +33,7 @@ export class AuthorStore extends BaseStore<Author> {
     );
   }
 
-  getId(item: Author): string {
+  selectedId(item: Author): string {
     return item.id;
   }
 }

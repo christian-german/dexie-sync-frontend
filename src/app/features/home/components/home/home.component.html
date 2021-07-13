@@ -1,59 +1,59 @@
 <div class="padded">
-  <table mat-table [dataSource]="datasource" class="mat-elevation-z8" multiTemplateDataRows>
+  <table [dataSource]="datasource" class="mat-elevation-z8" mat-table multiTemplateDataRows>
 
     <ng-container matColumnDef="select">
-      <th scope="col" mat-header-cell *matHeaderCellDef>
+      <th *matHeaderCellDef mat-header-cell scope="col">
         <mat-checkbox (change)="$event ? masterToggle() : null"
+                      [aria-label]="checkboxLabel()"
                       [checked]="selection.hasValue() && isAllSelected()"
-                      [indeterminate]="selection.hasValue() && !isAllSelected()"
-                      [aria-label]="checkboxLabel()">
+                      [indeterminate]="selection.hasValue() && !isAllSelected()">
         </mat-checkbox>
       </th>
-      <td mat-cell *matCellDef="let row">
-        <mat-checkbox (click)="$event.stopPropagation()"
-                      (change)="$event ? selection.toggle(row) : null"
-                      [checked]="selection.isSelected(row)"
-                      [aria-label]="checkboxLabel(row)">
+      <td *matCellDef="let row" mat-cell>
+        <mat-checkbox (change)="$event ? selection.toggle(row) : null"
+                      (click)="$event.stopPropagation()"
+                      [aria-label]="checkboxLabel(row)"
+                      [checked]="selection.isSelected(row)">
         </mat-checkbox>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="firstname">
-      <th scope="col" mat-header-cell *matHeaderCellDef> Author's firstname</th>
-      <td mat-cell *matCellDef="let author"> {{author.firstname}} </td>
+      <th *matHeaderCellDef mat-header-cell scope="col"> Author's firstname</th>
+      <td *matCellDef="let author" mat-cell> {{author.firstname}} </td>
     </ng-container>
 
     <ng-container matColumnDef="lastname">
-      <th scope="col" mat-header-cell *matHeaderCellDef> Author's lastname</th>
-      <td mat-cell *matCellDef="let author"> {{author.lastname}} </td>
+      <th *matHeaderCellDef mat-header-cell scope="col"> Author's lastname</th>
+      <td *matCellDef="let author" mat-cell> {{author.lastname}} </td>
     </ng-container>
 
     <ng-container matColumnDef="expandedDetail">
-      <td mat-cell *matCellDef="let author" [attr.colspan]="2">
-        <div class="example-element-detail" [@detailExpand]="author == expandedAuthor ? 'expanded' : 'collapsed'">
+      <td *matCellDef="let author" [attr.colspan]="2" mat-cell>
+        <div [@detailExpand]="author == expandedAuthor ? 'expanded' : 'collapsed'" class="example-element-detail">
           <app-list-books [authorId]="author.id"></app-list-books>
         </div>
       </td>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="['select', 'firstname', 'lastname']"></tr>
-    <tr mat-row *matRowDef="let author; columns: ['select', 'firstname', 'lastname'];"
-        class="example-element-row"
+    <tr *matHeaderRowDef="['select', 'firstname', 'lastname']" mat-header-row></tr>
+    <tr (click)="expandedAuthor = expandedAuthor === author ? null : author" *matRowDef="let author; columns: ['select', 'firstname', 'lastname'];"
         [class.example-expanded-row]="expandedAuthor === author"
-        (click)="expandedAuthor = expandedAuthor === author ? null : author">
+        class="example-element-row"
+        mat-row>
     </tr>
-    <tr mat-row *matRowDef="let author; columns: ['expandedDetail'];" class="example-detail-row"></tr>
+    <tr *matRowDef="let author; columns: ['expandedDetail'];" class="example-detail-row" mat-row></tr>
   </table>
 
   <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
 </div>
 
 <div>
-  <button mat-raised-button (click)="openAddAuthorDialog()">
+  <button (click)="openAddAuthorDialog()" mat-raised-button>
     Add author
   </button>
 
-  <button mat-raised-button (click)="deleteSelected()">
+  <button (click)="deleteSelected()" mat-raised-button>
     Delete selected
   </button>
 </div>

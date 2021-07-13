@@ -1,5 +1,5 @@
-import { BehaviorSubject, Subject } from "rxjs";
-import {IEvent}  from "./IEvent";
+import { BehaviorSubject, Subject } from 'rxjs';
+import { IEvent } from './IEvent';
 
 export interface IEventRegister {
   event: IEvent;

@@ -1,11 +1,12 @@
-import {Router} from '@angular/router';
-import {Component} from '@angular/core';
-import {DatabaseService} from "./core/services/database.service";
+import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DatabaseService } from './core/services/database.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
 

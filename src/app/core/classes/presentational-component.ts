@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 
 export class PresentationalComponent implements OnDestroy {

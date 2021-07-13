@@ -5,7 +5,6 @@ import { AlterationsService } from '../services/alterations.service';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 
-
 @NgModule({
   declarations: [],
   imports: [

@@ -1,22 +1,33 @@
-<mat-toolbar color="primary" class="main-header mat-elevation-z4">
+<mat-toolbar class="main-header mat-elevation-z4" color="primary">
   <mat-toolbar-row style="padding: 0 5px;">
-    <div class="title-zone" (click)="goHome()">
+    <div (click)="goHome()" class="title-zone">
       <div class="mat-title title">Mon Portail</div>
       <div class="mat-subheading-2 sub-title">by Innoval</div>
     </div>
-    <button class="mobile" mat-icon-button (click)="goHome()">
+    <button (click)="goHome()" class="mobile" mat-icon-button>
       <mat-icon>home</mat-icon>
     </button>
-    <app-search placeholder="Rechercher..." (searchUpdate)="doSearch($event)" min-chars="3" #appSearch></app-search>
+    <app-search #appSearch (searchUpdate)="doSearch($event)" min-chars="3" placeholder="Rechercher..."></app-search>
     <div class="nb-results">
       {{nbAuthors$ | async}} auteurs |
       {{nbBooks$ | async}} livres |
-      <ng-container *ngIf="currentRevision$ | async as currentRevision; else syncroDisconnected">
-        🟢 {{currentRevision}} currentRevision
+      <ng-container [ngSwitch]="currentRevision$ | async">
+        <ng-container *ngSwitchCase="1">
+          🟢 Connecting...
+        </ng-container>
+        <ng-container *ngSwitchCase="2">
+          🟢 Online
+        </ng-container>
+        <ng-container *ngSwitchCase="3">
+          🟢 Syncing...
+        </ng-container>
+        <ng-template *ngSwitchCase="4">
+          🔴 Syncro not connected (refresh until it goes green to fix it)
+        </ng-template>
+        <ng-template ngSwitchDefault>
+          🔴 Error occured
+        </ng-template>
       </ng-container>
-      <ng-template #syncroDisconnected>
-        🔴 Syncro not connected (refresh until it goes green to fix it)
-      </ng-template>
     </div>
 
   </mat-toolbar-row>

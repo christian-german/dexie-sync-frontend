@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { BaseStore } from '../classes/baseStore';
 import { DatabaseService } from '../services/database.service';
 import { EventBusService } from '../services/event-bus.service';
-import { map } from 'rxjs/operators';
 
 export interface Book {
   id: string;
@@ -29,7 +28,7 @@ export class BookStore extends BaseStore<Book> {
     return this.getByKey('authorId', authorId);
   }
 
-  getId(item: Book): string {
+  selectedId(item: Book): string {
     return item.id;
   }
 }

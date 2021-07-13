@@ -1,5 +1,5 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -20,6 +20,7 @@ import { first } from 'rxjs/operators';
       transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
     ]),
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit {
 
@@ -73,7 +74,6 @@ export class HomeComponent implements OnInit {
   deleteSelected() {
     this.selection.selected.forEach(
       author => {
-        console.log(`Deleting author: ${JSON.stringify(author)}`);
         this.homeService.deleteAuthor(author.id!).subscribe();
       }
     );

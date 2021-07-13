@@ -1,4 +1,5 @@
 import { IEvent } from '../interfaces/IEvent';
+import { SynchroState } from '../services/dexie.service';
 
 export class StoreEvents implements IEvent {
   public static STORE_CACHE_DATA_ADDED = 'STORE_CACHE_DATA_ADDED';
@@ -11,6 +12,12 @@ export class StoreEvents implements IEvent {
 
 export interface Event {
   payload?: any;
+}
+
+export interface DexieStateChangedEvent extends Event {
+  payload: {
+    state: SynchroState
+  }
 }
 
 export interface StoreCacheDataAddedEvent<T> extends Event {
@@ -39,8 +46,7 @@ export interface CurrentRevisionChangeEvent extends Event {
 }
 
 export class DexieEvents implements IEvent {
-  public static DEXIE_START_SYNC: string = 'DEXIE_START_SYNC';
   public static DEXIE_CURRENT_REVISION_CHANGE: string = 'DEXIE_CURRENT_REVISION_CHANGE';
-  public static DEXIE_END_SYNC: string = 'DEXIE_END_SYNC';
   public static DEXIE_TABLE_CHANGE: string = 'DEXIE_TABLE_CHANGE';
+  static STATE_CHANGED: 'DEXIE_STATE_CHANGED';
 }

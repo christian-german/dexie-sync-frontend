@@ -1,6 +1,7 @@
 import { BaseCache } from './base-cache';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
+import { log } from './logger';
 
 export interface CacheOperation<T> {
   lastRefresh: Date;
@@ -14,9 +15,10 @@ export class CacheOperations<T> extends BaseCache<T[]> {
   idsTimeTable = new Map<string, CacheOperation<T[]>>();
 
   constructor(
+    protected readonly isLocked = false,
     protected readonly initialState?: Map<string, T[]>
   ) {
-    super(initialState ? initialState : new Map<string, T[]>());
+    super(isLocked);
   }
 
   refresh(id: string, refresher$: () => Observable<T[]>, timeAfterConsideredExpired = 10000) {
@@ -60,7 +62,7 @@ export class CacheOperations<T> extends BaseCache<T[]> {
     const obs$: Observable<T[]>[] = [];
     this.isSyncronizing$.next(true);
     this.idsTimeTable.forEach(item => obs$.push(this.refresh(item.id, item.refresher$, item.timeAfterConsideredExpired)));
-    console.info(`Doing heavy refresh on ${obs$.length} observers`);
+    log('CacheOperations', `Doing heavy refresh on ${obs$.length} observers`);
     return forkJoin(obs$).pipe(
       tap(_ => this.isSyncronizing$.next(false)),
     );

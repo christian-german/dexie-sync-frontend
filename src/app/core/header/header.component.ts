@@ -6,7 +6,7 @@ import { SearchService } from '../../shared/services/search.service';
 import { AuthorStore } from '../stores/author.store';
 import { BookStore } from '../stores/book.store';
 import { EventBusService } from '../services/event-bus.service';
-import { CurrentRevisionChangeEvent, DexieEvents } from '../classes/bus-events';
+import { DexieEvents, DexieStateChangedEvent } from '../classes/bus-events';
 
 @Component({
   selector: 'app-header',
@@ -26,8 +26,8 @@ export class HeaderComponent implements OnInit {
     map(books => books.length),
   )
 
-  currentRevision$ = this.eventBusService.on<CurrentRevisionChangeEvent>(DexieEvents.DEXIE_CURRENT_REVISION_CHANGE).pipe(
-    map(event => event.payload.currentRevision),
+  currentRevision$ = this.eventBusService.on<DexieStateChangedEvent>(DexieEvents.STATE_CHANGED).pipe(
+    map(event => event.payload.state),
   )
 
   constructor(

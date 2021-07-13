@@ -1,14 +1,14 @@
-import {APP_INITIALIZER, NgModule} from '@angular/core';
-import {BrowserModule} from '@angular/platform-browser';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 
-import {AppComponent} from './app.component';
-import {AppRoutingModule} from "./app-routing.module";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {CoreModule} from "./core/core.module";
-import {HttpClientModule} from "@angular/common/http";
-import {ServiceWorkerModule} from '@angular/service-worker';
-import {environment} from '../environments/environment';
-import {PwaService} from "./core/services/pwa.service";
+import { AppComponent } from './app.component';
+import { AppRoutingModule } from './app-routing.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CoreModule } from './core/core.module';
+import { HttpClientModule } from '@angular/common/http';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
+import { PwaService } from './core/services/pwa.service';
 
 const initializer = (pwaService: PwaService) => () => pwaService.initPwaPrompt();
 

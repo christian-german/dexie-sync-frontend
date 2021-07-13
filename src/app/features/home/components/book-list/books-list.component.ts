@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { Book, BookStore } from '../../../../core/stores/book.store';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddBookComponent } from '../dialog-add-book/dialog-add-book.component';
-import { takeUntil, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-list-books',
@@ -25,9 +24,7 @@ export class BooksListComponent implements OnInit {
   }
 
   getBooks(authorId: string): Observable<Book[]> {
-    return this.bookService.getBooksByAuthorId(authorId).pipe(
-      tap(value => console.info(value)),
-    );
+    return this.bookService.getBooksByAuthorId(authorId);
   }
 
   addBook() {
