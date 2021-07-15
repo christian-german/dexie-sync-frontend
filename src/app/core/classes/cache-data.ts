@@ -1,6 +1,7 @@
 import { Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { BaseCache } from './base-cache';
+import { logError } from './logger';
 
 export class CacheData<T> extends BaseCache<T> {
 
@@ -57,7 +58,12 @@ export class CacheData<T> extends BaseCache<T> {
 
   add(items: T[]) {
     const nextState = this.getValue();
-    items.forEach(item => nextState.set(this.getId(item), item));
+    items.forEach(item => {
+      if (nextState.get((item as any).id)) {
+        logError('CacheData', `Item already in cache: ${(item as any).id}`);
+      }
+      return nextState.set(this.getId(item), item);
+    });
     this.next(nextState);
   }
 
