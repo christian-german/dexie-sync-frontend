@@ -6,9 +6,9 @@ import { log, logError } from '../classes/logger';
 import { environment } from '../../../environments/environment';
 import observable from 'dexie-observable';
 import syncable from 'dexie-syncable';
-import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, of, Subject } from 'rxjs';
 import { IDatabaseChange } from 'dexie-observable/api';
-import { filter, map } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { EmitEvent } from '../interfaces/Event';
 import { DexieEvents } from '../classes/bus-events';
 
@@ -82,9 +82,7 @@ export class DexieService extends Dexie {
     if (!changes || changes.length === 0) {
       return;
     }
-    this.count += changes.length;
     this.temp_changes$.next(changes);
-    console.info(this.count);
   }
 
   onChange() {
@@ -118,54 +116,70 @@ export class DexieService extends Dexie {
 
         const request = {
           clientIdentity: context.clientIdentity || null,
-          baseRevision: baseRevision || 0,
+          baseRevision: baseRevision + 100,
           partial: partial,
           changes: changes,
           syncedRevision: syncedRevision
         };
         // TODO Propagate the changes to all corresponding angular's store
-        http.post<any>(url, request).subscribe(
-          res => {
+        http.post<any>(url, request).pipe(
+          switchMap(res => {
             log(LOGGER_FROM, `Response to /sync from Server: ${res.currentRevision}, clientIdentity: ${res.clientIdentity}, partial: ${res.partial}, success: ${res.success}, changes: ${res.changes.length}`)
             if (!res.success) {
               // Infinity: Stop la synchro.
               onError(res.errorMessage, Infinity);
               logError(LOGGER_FROM, 'Error');
+              return of(res.errorMessage);
             } else {
               if ('clientIdentity' in res) {
                 context.clientIdentity = res.clientIdentity;
                 // Make sure we save the clientIdentity sent by the server before we try to resync.
                 // If saving fails we wouldn't be able to do a partial synchronization
-                context.save()
-                  .then(() => {
+                return from(context.save()).pipe(
+                  mergeMap(x => {
                     // Since we got success, we also know that server accepted our changes:
                     onChangesAccepted();
                     // Convert the response format to the Dexie.Syncable.Remote.SyncProtocolAPI specification:
-                    applyRemoteChanges(res.changes, res.currentRevision, res.partial, res.needsResync);
+                    return from(applyRemoteChanges(res.changes, res.currentRevision, res.partial, res.needsResync)).pipe(
+                      tap(_ => {
+                        this.addChange(res.changes);
+                        if (res.partial) {
+                          onSuccess({again: 0});
+                          this.onStateChange(SynchroState.SYNCING_PARTIALLY);
+                        } else {
+                          if (this.isSyncingPartially$.getValue()) {
+                            this.isSyncingPartially$.next(false);
+                          }
+                          onSuccess({again: POLL_INTERVAL});
+                        }
+                      })
+                    );
                     // Immediatly send another request if the client received a partial change.
-                    this.addChange(res.changes);
-                    if (res.partial) {
-                      onSuccess({again: 0});
-                      this.onStateChange(SynchroState.SYNCING_PARTIALLY);
-                    } else {
-                      this.isSyncingPartially$.next(false);
-                      onSuccess({again: POLL_INTERVAL});
-                    }
-                  })
-                  .catch((e) => {
+                  }),
+                  catchError(error => {
                     // We didn't manage to save the clientIdentity stop synchronization
-                    onError(e, Infinity);
+                    onError(error, Infinity);
                     logError(LOGGER_FROM, 'Error');
-                  });
+                    return of(error);
+                  })
+                );
+
               } else {
+                console.info('x1');
                 // Since we got success, we also know that server accepted our changes:
                 onChangesAccepted();
                 // Convert the response format to the Dexie.Syncable.Remote.SyncProtocolAPI specification:
-                applyRemoteChanges(res.changes, res.currentRevision, res.partial, res.needsResync);
-                // this.addChange(res.changes);
-                onSuccess({again: POLL_INTERVAL});
+                return from(applyRemoteChanges(res.changes, res.currentRevision, res.partial, res.needsResync)).pipe(
+                  tap(_ => {
+                    this.addChange(res.changes);
+                    onSuccess({again: POLL_INTERVAL});
+                  })
+                );
               }
             }
+          })
+        ).subscribe(
+          res => {
           },
           error => {
             console.log('error');
@@ -191,11 +205,9 @@ export class DexieService extends Dexie {
     })
     this.on('blocked', (event) => {
       log(LOGGER_FROM, 'Dexie is blocked !');
-      console.info(event);
     })
     this.on('populate', (trans) => {
       log(LOGGER_FROM, 'Dexie is ready !');
-      console.info(trans);
     })
   }
 
@@ -274,7 +286,9 @@ export class DexieService extends Dexie {
        */
       case 5:
         log(LOGGER_FROM, 'Received changes from server but more is coming (partial mode).');
-        this.isSyncingPartially$.next(true);
+        if (!this.isSyncingPartially$.getValue()) {
+          this.isSyncingPartially$.next(true);
+        }
         break;
     }
   }
