@@ -17,11 +17,9 @@ export class DatabaseService {
     private readonly eventBusService: EventBusService,
     private readonly dexieService: DexieService) {
 
-    this.dexieService.whenReadyToPropagate().subscribe(masterChanges => {
-        masterChanges.forEach(changes => {
-          this.propagateChangesToStore(changes);
-        })
-        this.dexieService.clearChanges();
+    this.dexieService.onChange().subscribe(masterChanges => {
+        this.propagateChangesToStore(masterChanges);
+        // this.dexieService.clearChanges();
       }
     )
   }
@@ -59,6 +57,7 @@ export class DatabaseService {
         tableName: mappedArrayKey,
         payload: mappedArray[mappedArrayKey]
       }));
+      console.info('Propagating: ', mappedArray[mappedArrayKey]);
     }
   }
 }

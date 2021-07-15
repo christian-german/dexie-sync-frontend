@@ -26,7 +26,7 @@ export class HeaderComponent implements OnInit {
     map(books => books.length),
   )
 
-  currentRevision$ = this.eventBusService.on<DexieStateChangedEvent>(DexieEvents.STATE_CHANGED).pipe(
+  synchroState$ = this.eventBusService.on<DexieStateChangedEvent>(DexieEvents.STATE_CHANGED).pipe(
     map(event => event.payload.state),
   )
 

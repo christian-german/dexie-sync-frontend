@@ -11,7 +11,7 @@
     <div class="nb-results">
       {{nbAuthors$ | async}} auteurs |
       {{nbBooks$ | async}} livres |
-      <ng-container [ngSwitch]="currentRevision$ | async">
+      <ng-container [ngSwitch]="synchroState$ | async">
         <ng-container *ngSwitchCase="1">
           🟢 Connecting...
         </ng-container>

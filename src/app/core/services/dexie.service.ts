@@ -6,7 +6,7 @@ import { log, logError } from '../classes/logger';
 import { environment } from '../../../environments/environment';
 import observable from 'dexie-observable';
 import syncable from 'dexie-syncable';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { IDatabaseChange } from 'dexie-observable/api';
 import { filter, map } from 'rxjs/operators';
 import { EmitEvent } from '../interfaces/Event';
@@ -57,6 +57,10 @@ export class DexieService extends Dexie {
   private readonly isLocked$ = new BehaviorSubject(false);
   private readonly isSyncingPartially$ = new BehaviorSubject(false);
   private readonly changes$ = new BehaviorSubject<IDatabaseChange[][]>([]);
+  private readonly temp_changes$ = new Subject<IDatabaseChange[]>();
+
+  // DEBUG
+  private count = 0;
 
   constructor(private http: HttpClient,
               private readonly eventBusService: EventBusService) {
@@ -78,15 +82,16 @@ export class DexieService extends Dexie {
     if (!changes || changes.length === 0) {
       return;
     }
-    const actualChanges = this.changes$.getValue();
-    actualChanges.push(changes);
-    this.changes$.next(actualChanges);
+    this.count += changes.length;
+    this.temp_changes$.next(changes);
+    console.info(this.count);
   }
 
   onChange() {
-    return this.changes$.pipe(
-      filter(changes => changes.length > 0)
-    );
+    return this.temp_changes$.asObservable();
+    // return this.changes$.pipe(
+    //   filter(changes => changes.length > 0)
+    // );
   }
 
   clearChanges() {
@@ -125,6 +130,7 @@ export class DexieService extends Dexie {
             if (!res.success) {
               // Infinity: Stop la synchro.
               onError(res.errorMessage, Infinity);
+              logError(LOGGER_FROM, 'Error');
             } else {
               if ('clientIdentity' in res) {
                 context.clientIdentity = res.clientIdentity;
@@ -137,6 +143,7 @@ export class DexieService extends Dexie {
                     // Convert the response format to the Dexie.Syncable.Remote.SyncProtocolAPI specification:
                     applyRemoteChanges(res.changes, res.currentRevision, res.partial, res.needsResync);
                     // Immediatly send another request if the client received a partial change.
+                    this.addChange(res.changes);
                     if (res.partial) {
                       onSuccess({again: 0});
                       this.onStateChange(SynchroState.SYNCING_PARTIALLY);
@@ -144,19 +151,19 @@ export class DexieService extends Dexie {
                       this.isSyncingPartially$.next(false);
                       onSuccess({again: POLL_INTERVAL});
                     }
-                    this.addChange(res.changes);
                   })
                   .catch((e) => {
                     // We didn't manage to save the clientIdentity stop synchronization
                     onError(e, Infinity);
+                    logError(LOGGER_FROM, 'Error');
                   });
               } else {
                 // Since we got success, we also know that server accepted our changes:
                 onChangesAccepted();
                 // Convert the response format to the Dexie.Syncable.Remote.SyncProtocolAPI specification:
                 applyRemoteChanges(res.changes, res.currentRevision, res.partial, res.needsResync);
+                // this.addChange(res.changes);
                 onSuccess({again: POLL_INTERVAL});
-                this.addChange(res.changes);
               }
             }
           },
@@ -179,6 +186,17 @@ export class DexieService extends Dexie {
       books: '$$id, title, authorId',
       authors: '$$id, firstname, lastname'
     });
+    this.on('ready', () => {
+      log(LOGGER_FROM, 'Dexie is ready !');
+    })
+    this.on('blocked', (event) => {
+      log(LOGGER_FROM, 'Dexie is blocked !');
+      console.info(event);
+    })
+    this.on('populate', (trans) => {
+      log(LOGGER_FROM, 'Dexie is ready !');
+      console.info(trans);
+    })
   }
 
   /**
