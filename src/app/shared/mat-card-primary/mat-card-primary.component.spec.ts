@@ -8,9 +8,9 @@ describe('MatCardPrimaryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ MatCardPrimaryComponent ]
+      declarations: [MatCardPrimaryComponent]
     })
-    .compileComponents();
+      .compileComponents();
   });
 
   beforeEach(() => {

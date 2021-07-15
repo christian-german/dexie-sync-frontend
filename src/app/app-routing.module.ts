@@ -1,6 +1,6 @@
-import {HomeModule} from './features/home/home.module';
-import {NgModule} from '@angular/core';
-import {RouterModule, Routes} from '@angular/router';
+import { HomeModule } from './features/home/home.module';
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [{
   path: 'home',

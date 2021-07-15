@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
-import {Observable} from 'rxjs';
-import {Author, AuthorService} from "../services/author.service";
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
+import { Observable } from 'rxjs';
+import { Author, AuthorService } from '../services/author.service';
 
 @Injectable({providedIn: 'root'})
 export class AuthorResolver implements Resolve<Author | null> {

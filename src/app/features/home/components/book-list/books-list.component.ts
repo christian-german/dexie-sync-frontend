@@ -1,8 +1,8 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {Observable} from "rxjs";
-import {Book, BookService} from "../../../../core/services/book.service";
-import {MatDialog} from "@angular/material/dialog";
-import {DialogAddBookComponent} from "../dialog-add-book/dialog-add-book.component";
+import { Component, Input, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Book, BookStore } from '../../../../core/stores/book.store';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogAddBookComponent } from '../dialog-add-book/dialog-add-book.component';
 
 @Component({
   selector: 'app-list-books',
@@ -14,9 +14,9 @@ export class BooksListComponent implements OnInit {
   @Input()
   authorId: string | undefined;
   books$: Observable<Book[]> | undefined;
-  addedBookTitle: string = "";
+  addedBookTitle: string = '';
 
-  constructor(private readonly bookService: BookService, public dialog: MatDialog) {
+  constructor(private readonly bookService: BookStore, public dialog: MatDialog) {
   }
 
   ngOnInit(): void {

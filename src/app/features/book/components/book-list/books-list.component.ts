@@ -1,6 +1,6 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {Observable} from "rxjs";
-import { Book, BookService } from '../../../../core/services/book.service';
+import { Component, Input, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Book, BookStore } from '../../../../core/stores/book.store';
 
 @Component({
   selector: 'app-list-books',
@@ -14,12 +14,11 @@ export class BooksListComponent implements OnInit {
 
   books$: Observable<Book[]> | undefined;
 
-  constructor(private readonly bookService: BookService) {
+  constructor(private readonly bookService: BookStore) {
   }
 
   ngOnInit(): void {
     this.books$ = this.getBooks(this.authorId!!);
-    // this.books$.subscribe((data) => console.info('New: ', data));
   }
 
   getBooks(authorId: string): Observable<Book[]> {
@@ -29,7 +28,7 @@ export class BooksListComponent implements OnInit {
   addBook() {
     this.bookService.add(
       {
-        title: "New book",
+        title: 'New book',
         authorId: this.authorId!!
       }
     ).subscribe();
