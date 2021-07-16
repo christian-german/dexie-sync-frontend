@@ -10,7 +10,7 @@ import { fromEvent } from 'rxjs';
 })
 export class SearchComponent implements OnInit {
 
-  @ViewChild('searchInput', { static: true })
+  @ViewChild('searchInput', {static: true})
   searchInput!: ElementRef;
 
   @Input()

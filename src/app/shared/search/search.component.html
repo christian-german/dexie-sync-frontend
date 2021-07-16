@@ -1,9 +1,9 @@
 <div class="search-block">
-    <button class="search-icon" mat-icon-button color="primary" [disabled]="disabled" (click)="search()">
-        <mat-icon>search</mat-icon>
-    </button>
-    <input class="search-control" type="text" [placeholder]="placeholder" #searchInput>
-    <button mat-button mat-icon-button color="primary" [class.hidden]="disabled" (click)="clear()">
-        <mat-icon>close</mat-icon>
-    </button>
+  <button (click)="search()" [disabled]="disabled" class="search-icon" color="primary" mat-icon-button>
+    <mat-icon>search</mat-icon>
+  </button>
+  <input #searchInput [placeholder]="placeholder" class="search-control" type="text">
+  <button (click)="clear()" [class.hidden]="disabled" color="primary" mat-button mat-icon-button>
+    <mat-icon>close</mat-icon>
+  </button>
 </div>

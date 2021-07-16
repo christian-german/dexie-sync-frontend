@@ -1,43 +1,43 @@
 @import 'responsive.mixin.scss';
 
 header {
-    z-index: 11;
-    transition: all 250ms ease-in-out;
+  z-index: 11;
+  transition: all 250ms ease-in-out;
 }
 
 .main-header {
-    @extend header;
+  @extend header;
 
-    .title-zone {
-        @include screen('phone'){
-            display: none;
-        }
-        padding:8px 10px 0 10px;
-        cursor: pointer;
+  .title-zone {
+    @include screen('phone') {
+      display: none;
+    }
+    padding: 8px 10px 0 10px;
+    cursor: pointer;
 
-        .title {
-            margin-bottom:2px;
-        }
-
-        .sub-title {
-            line-height:.6rem;
-            font-style: italic;
-        }
+    .title {
+      margin-bottom: 2px;
     }
 
-    .mobile {
-        display: none;
-        @include screen('phone'){
-            display: block;
-        }
+    .sub-title {
+      line-height: .6rem;
+      font-style: italic;
     }
+  }
 
-    .nb-results {
-        padding: 0 10px;
-        overflow: auto;
-        width: 100%;
-        @include screen('phone'){
-            font-size: 0.75em;
-        }
+  .mobile {
+    display: none;
+    @include screen('phone') {
+      display: block;
     }
+  }
+
+  .nb-results {
+    padding: 0 10px;
+    overflow: auto;
+    width: 100%;
+    @include screen('phone') {
+      font-size: 0.75em;
+    }
+  }
 }

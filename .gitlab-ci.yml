@@ -1,0 +1,119 @@
+include:
+  - project: "factory/pipeline"
+    ref: master
+    file: "variables.yml"
+  - project: "factory/pipeline"
+    ref: master
+    file: "stages.yml"
+  - project: "factory/pipeline"
+    ref: feature/make-docker-to-build-var-optional
+    file: "/docker.yml"
+
+# npm:run:test:
+#   image: christiangerman/node-chrome:latest
+#   script:
+#     - export CHROME_BIN=/usr/bin/google-chrome
+#     - npm config set registry https://nexus.evolution-xy.fr/repository/npm-proxy/
+#     - npm ci
+#     - npm run lint
+#     - npm run test:ci
+#   stage: test
+#   artifacts:
+#     paths:
+#       - ./coverage/occ-frontend/lcov.info
+#   tags:
+#     - docker
+
+# npm:run:test:e2e:
+#   image: cypress/browsers:node12.14.1-chrome85-ff81
+#   script:
+#     - npm config set registry https://nexus.evolution-xy.fr/repository/npm-proxy/
+#     - npm ci
+#     - npm run e2e:ci
+#   stage: test
+#   artifacts:
+#     when: always
+#     paths:
+#       - cypress/videos/**/*.mp4
+#       - cypress/screenshots/**/*.png
+#     expire_in: 1 day
+#   tags:
+#     - docker
+
+# npm:run:sonar:
+#  script:
+#    - 'VERSION="${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}_${CI_BUILD_ID}"'
+#    - 'NAME="${CI_PROJECT_NAME}"'
+#    - 'SRC="src"'
+#    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.projectName=$NAME -Dsonar.projectKey=$NAME -Dsonar.sources=$SRC -Dsonar.tests=$SRC -Dsonar.test.inclusions=$SRC/**/*.spec.ts -Dsonar.exclusions=$SRC/**/*.spec.ts -Dsonar.projectBaseDir=./ -Dsonar.javascript.lcov.reportPaths=coverage/occ-frontend/lcov.info -Dsonar.projectVersion=$VERSION -Dsonar.scanner.metadataFilePath=$(pwd)/report.sh
+#    - |
+#      if [[ -z $SONAR_ENABLE  ||  "$SONAR_ENABLE" == "true" ]] && [ "$SONAR_BRANCH" != "Staging" ]
+#      then echo "Vérification de la qualité activée"
+#           source ./report.sh
+#           quality=null
+#           i=0
+#           while [ "$quality" == "null" -a $i -lt 10 ]
+#           do i=$(expr $i + 1)
+#              quality=$(curl -s $serverUrl/api/qualitygates/project_status?analysisId=$(curl -s $ceTaskUrl | jq -r '.task.analysisId') | jq -r '.projectStatus.status')
+#              if [ "$quality" == "null" ]
+#              then sleep 5
+#              fi
+#           done
+#           echo "--------------------------------"
+#           echo "PROJECT : $NAME"
+#           echo "VERSION : $VERSION"
+#           echo "QUALITY : $quality"
+#           echo "REPORT  : $dashboardUrl"
+#           echo "--------------------------------"
+#           [ "$quality" == "SUCCESS" ] || [ "$quality" == "OK" ]
+#      else echo "Défaut de qualité non bloquante"
+#           source ./report.sh
+#           echo "--------------------------------"
+#           echo "PROJECT : $NAME"
+#           echo "VERSION : $VERSION"
+#           echo "REPORT  : $dashboardUrl"
+#           echo "--------------------------------"
+#      fi
+#  artifacts:
+#    paths:
+#      - ./coverage/occ-frontend/lcov.info
+#  stage: analysis
+#  tags:
+#    - sonar-scanner
+
+# npm:run:compodoc:
+#   image: christiangerman/node-chrome:latest
+#   script:
+#     - npm config set registry https://nexus.evolution-xy.fr/repository/npm-proxy/
+#     - npm ci
+#     - npm run doc
+#   stage: integration
+#   artifacts:
+#     paths:
+#       - ./doc-technique
+#     expire_in: 1 yrs
+#   tags:
+#     - docker
+#   only:
+#     refs:
+#       - develop
+
+docker:build:nginx:
+  extends: .build_image_script
+  after_script:
+    - docker tag "$REPO_DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG" "$REPO_DOCKER_ID/$DOCKER_IMAGE:latest"
+    - docker push "$REPO_DOCKER_ID/$DOCKER_IMAGE:latest"
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_TO_PACKAGE: "./"
+    REPO_DOCKER_ID: ${REPO_DOCKER_SERVICE_ID}
+    REPO_DOCKER_USER: ${REPO_DOCKER_SERVICE_USER}
+    REPO_DOCKER_PASS: ${REPO_DOCKER_SERVICE_PASS}
+    DOCKER_IMAGE: occ-frontend
+    DOCKER_TAG: "0.0.${CI_JOB_ID}"
+    DOCKER_DIRECTORY: ${DOCKER_TO_PACKAGE}
+  only:
+    refs:
+      - release
+      - develop
+      - fix/routes-angular-nginx

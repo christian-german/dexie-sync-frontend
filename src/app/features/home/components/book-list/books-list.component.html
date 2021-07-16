@@ -3,7 +3,7 @@
     <li *ngFor="let book of books$ | async">{{ book.title }}</li>
   </ul>
 
-  <button mat-button (click)="addBook()">
+  <button (click)="addBook()" mat-button>
     Add book
   </button>
 </section>

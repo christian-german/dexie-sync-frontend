@@ -3,10 +3,10 @@ import { SearchComponent } from '../../shared/search/search.component';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { SearchService } from '../../shared/services/search.service';
-import { AuthorService } from '../services/author.service';
-import { BookService } from '../services/book.service';
+import { AuthorStore } from '../stores/author.store';
+import { BookStore } from '../stores/book.store';
 import { EventBusService } from '../services/event-bus.service';
-import { CurrentRevisionChangeEvent, DexieEvents } from '../classes/bus-events';
+import { DexieEvents, DexieStateChangedEvent } from '../classes/bus-events';
 
 @Component({
   selector: 'app-header',
@@ -26,13 +26,13 @@ export class HeaderComponent implements OnInit {
     map(books => books.length),
   )
 
-  currentRevision$ = this.eventBusService.on<CurrentRevisionChangeEvent>(DexieEvents.DEXIE_CURRENT_REVISION_CHANGE).pipe(
-    map(event => event.payload.currentRevision),
+  synchroState$ = this.eventBusService.on<DexieStateChangedEvent>(DexieEvents.STATE_CHANGED).pipe(
+    map(event => event.payload.state),
   )
 
   constructor(
-    private readonly authorService: AuthorService,
-    private readonly bookService: BookService,
+    private readonly authorService: AuthorStore,
+    private readonly bookService: BookStore,
     private router: Router,
     private readonly searchService: SearchService,
     // TODO REMOVE

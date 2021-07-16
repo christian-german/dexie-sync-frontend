@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   DEBOUNCE_TIME: 500,
-  serverUrl: 'http://localhost:8080/sync'
+  serverUrl: 'https://dexie-sync-backend.outworld.fr/sync'
 };
 
 /*

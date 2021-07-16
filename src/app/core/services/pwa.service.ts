@@ -1,9 +1,9 @@
-import {Injectable} from "@angular/core";
-import {MatBottomSheet} from "@angular/material/bottom-sheet";
-import {Platform} from "@angular/cdk/platform";
-import {timer} from "rxjs";
-import {take} from "rxjs/operators";
-import {PromptComponent} from "../../shared/prompt-component/prompt-component";
+import { Injectable } from '@angular/core';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { Platform } from '@angular/cdk/platform';
+import { timer } from 'rxjs';
+import { take } from 'rxjs/operators';
+import { PromptComponent } from '../../shared/prompt-component/prompt-component';
 
 @Injectable({
   providedIn: 'root'

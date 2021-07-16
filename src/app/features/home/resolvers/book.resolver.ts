@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
-import {Observable} from 'rxjs';
-import {Book, BookService} from "../services/book.service";
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
+import { Observable } from 'rxjs';
+import { Book, BookService } from '../services/book.service';
 
 @Injectable({providedIn: 'root'})
 export class BookResolver implements Resolve<Book | null> {
